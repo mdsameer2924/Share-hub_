@@ -1,6 +1,7 @@
 from flask import Flask
 import hashlib
 import sqlite3
+from pathlib import Path
 
 app = Flask(__name__)
 app.secret_key = "sharehub_secret_key_2026"
