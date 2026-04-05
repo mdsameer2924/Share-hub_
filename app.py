@@ -19,9 +19,9 @@ def upload_File():
     file.save(file_path)
     return redirect(url_for('home'))
 
-@app.route('/fetch/<filename>')
+@app.route('/download/<filename>')
 def download(filename):
-    return send_from_directory(app.config['Upload_folder'], filename, as_attachment=False)
+    return send_from_directory(app.config['Upload_folder'], filename, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
