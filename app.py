@@ -47,7 +47,7 @@ def get_user_db(username):
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             file_name TEXT,
-            datatype TEXT DEFAULT 'text',
+            data_type TEXT DEFAULT 'text',
             uploaded_at TEXT NOT NULL
         )
     """)
@@ -116,4 +116,29 @@ def logout():
     session.pop("useranme", None)
     return redirect(url_for("index"))
 
+# ─── MAIN PAGES ──────────────────────────────────────────────────────────────
+
+@app.route("/manipulate")
+def manipulate():
+    if "useranme" not in session:
+        return redirect(url_for("index"))
+    return reder_template("manipulate.html", username=session["username"])
+
+@app.route("/view")
+def view():
+    if "username" not in session:
+        return redirect(url_for("index"))
+    username = session["username"]
+
+    conn, _ = get_user_db(username)
+    c = conn.cursor()
+    c.execute(
+        "SELECT id, title, content, file_name, data_type, uploaded_at FROM user_data
+        ORDER BY uploaded_at DECS"
+        )
+    rows = c.fetchall()
+    conn.close()
+    data = [{"id" : r[0], "title" : r[1], "content" : r[2], "file_name" : r[3], "data_type" : r[4], "uploaded_at" : r[5]} for r in rows]
+    return render_template("view.html", username=username, data=data)
+    
 
