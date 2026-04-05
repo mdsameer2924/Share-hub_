@@ -125,22 +125,14 @@
 
         <section>
             <p class="step">Available Files</p>
-
-            <article class="file">
-                <p>📄 notes.txt</p>
-                <a href="/download/notes.txt">Download</a>
-            </article>
-
-            <article class="file">
-                <p>💻 main.cpp</p>
-                <a href="/download/main.cpp">Download</a>
-            </article>
-
-            <article class="file">
-                <p>🌐 index.html</p>
-                <a href="/download/index.html">Download</a>
-            </article>
-
+{% for file in files %}
+<article class="file">
+    <p>📄 {{ file }}</p>
+    <a href="/fetch/{{ file }}">Download</a>
+</article>
+{% else %}
+<p style="color: #94a3b8;">Koi file nahi hai abhi.</p>
+{% endfor %}
         </section>
 
         <section class="devices">
