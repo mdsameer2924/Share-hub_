@@ -1,4 +1,4 @@
-from flask import Flask, reder_template, request, redirect, flash, url_for, session
+from flask import Flask, render_template, request, redirect, flash, url_for, session
 import hashlib
 import sqlite3
 import os
@@ -135,8 +135,8 @@ def view():
     conn, _ = get_user_db(username)
     c = conn.cursor()
     c.execute(
-        "SELECT id, title, content, file_name, data_type, uploaded_at FROM user_data
-        ORDER BY uploaded_at DECS"
+        '''SELECT id, title, content, file_name, data_type, uploaded_at FROM user_data
+        ORDER BY uploaded_at DECS'''
         )
     rows = c.fetchall()
     conn.close()
