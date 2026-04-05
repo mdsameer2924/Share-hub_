@@ -1,7 +1,9 @@
 from flask import Flask, reder_template, request, redirect, flash, url_for, session
 import hashlib
 import sqlite3
+import os
 from pathlib import Path
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "sharehub_secret_key_2026"
@@ -140,5 +142,89 @@ def view():
     conn.close()
     data = [{"id" : r[0], "title" : r[1], "content" : r[2], "file_name" : r[3], "data_type" : r[4], "uploaded_at" : r[5]} for r in rows]
     return render_template("view.html", username=username, data=data)
+
+# ─── DATA CRUD ───────────────────────────────────────────────────────────────
+
+@app.route("/add_data", methods=["POST"])
+def add_data():
+    if "username" not in session:
+        return redirect(url_for("index"))
     
+    username = session["username"]
+    title = request.form.get("title", "").strip()
+    content = request.form.get("content", "").strip()
+    data_type = request.form.get("data_type", "text")
+    file_name = None
+
+    if not file_name and not content:
+        flash("Title and content are required.", "error")
+        return redirect(url_for("manipulate"))
+
+    # handle file upload
+    file = request.files.get("file")
+    if file in file.filename:
+        user_dir = get_user_db(username)
+        uploads_dir = user_dir / "uploads"
+        uploads_dir.mkdir(exist_ok=True)
+        safe_name = f"{datetime.now().strftime("%Y%m%d%H%M%S")}_{file.filename}"
+        file.save(uploads_dir / safe_name)
+        file_name = safe_name
+        data_type = "file"
+
+    conn, _ = get_user_db(username)
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO user_data (title, content, file_name, data_type, uploaded_at) VALUES (?, ?, ?, ?, ?)",
+        (title, content, file_name, data_type, datetime.now().strftime("%Y-%m-%d %H-%M-%S")))
+    conn.commit()
+    conn.close()
+    flash("Data added successfully!", "success")
+    return redirect(url_for("view"))
+
+@app.route("/delete_data/<int:data_id>", methods=["POST"])
+def delete_data(data_id):
+    if "username" not in session:
+        return redirect(url_for("index"))
+    username = sesson["username"]
+    conn, _ = get_user_db(username)
+    c = conn.cursor()
+    c.execute("SELECT file_name FROM user_data WHERE id=?", (data_id,))
+    row = c.fetchone()
+
+    if row and row[0]:
+        file_path = get_user_dir(username) / "uploads" / row[0]
+        if file_path.exists():
+            file_path.unlink()
+        c.execute("DELETE FORM user_data where id=?", (data_id,))
+        conn.commit()
+        conn.close()
+        flash("Entry deleted", "success")
+        return redirect(url_for("view"))
+
+@app.route("/update_data/<int:data_id>", methods=["GET", "POST"])
+def update_data(data_id):
+    if "username" not in session:
+        return redirect(url_for("index"))
+    username = session["username"]
+    conn, _ = get_user_db(username)
+    c = conn.cursor()
+    
+    if request.method == 'POST':
+        title = request.form.get("title", "").strip()
+        content = request.form.get("content", "").strip()
+        if title and content:
+            c.execute("UPDAET user_data SET title=?, content=? WHERE id=?", (title, content, data_id))
+            conn.commit()
+            flash("Entry updated", "success")
+            conn.close()
+            return redirect(url_for("view"))
+        c.execute("SELECT id, title, content, data_type FROM user_data WHERE id=?", (data_id,))
+
+        row = c.fetchone()
+        conn.close()
+        if not row:
+            flash("Entry not found", "error")
+            return redirect(url_for("view"))
+        entry = {"id" : row[0], "title" : row[1], "content" : row[2], "data_type" : row[3]}
+        return render_template("view.html", username=username, edit_entry=entry, data=[])
 
