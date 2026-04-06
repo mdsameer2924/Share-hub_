@@ -5,7 +5,7 @@ import sys
 
 app = Flask(__name__)
 
-# PyInstaller ke liye base path
+# for pyinstaller path 
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
