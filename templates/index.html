@@ -82,7 +82,7 @@
         }
         
         a {
-            background: white;
+            background: rgb(176, 37, 37);
             padding: 6px 12px;
             text-decoration: none;
             border-radius: 6px;
@@ -101,6 +101,8 @@
             margin-top: 5px;
             color: #cbd5f5;
         }
+
+
     </style>
 </head>
 <body>
@@ -127,9 +129,8 @@
             <p class="step">Available Files</p>
 {% for file in files %}
 <article class="file">
-    <p>📄 {{ file }}</p>
-    <a href="/download/{{ file }}" name=file>Download</a>
-</article>
+    <p>{{ get_icon(f) }} {{ f }}</p>
+    <a class="dl" href="/download/{{ f }}">Download</a>
 {% else %}
 <p style="color: #94a3b8;">Koi file nahi hai abhi.</p>
 {% endfor %}
