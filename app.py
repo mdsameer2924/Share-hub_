@@ -96,11 +96,15 @@ TEMPLATE = """
                       <span class="iconify" data-icon="line-md:download-outline"></span>
                     Download
                     </a>
-                </article>
-                <form action="/delete/{{ f }}" method="POST" style="border:none;padding:0;margin:0;">
+
+                     <form action="/delete/{{ f }}" method="POST" style="border:none;padding:5px;margin:5px;">
                
-    <button type="submit" style="style=text-align: right;"> <span class="iconify" data-icon="weui:delete-on-filled" style="font-size: 15px;"></span></button>
+    <button type="submit"> 
+    <span class="iconify" data-icon="weui:delete-on-filled" 
+    style="font-size: 15px;"></span></button>
 </form>
+                </article>
+               
                 {% endfor %}
             {% else %}
                 <p class="empty">No files uploaded yet.</p>
