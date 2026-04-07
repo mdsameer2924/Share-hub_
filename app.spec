@@ -29,11 +29,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-<<<<<<< HEAD
-    console=True,
-=======
     console=False,
->>>>>>> 2ec7711291bf8201e13a75e27f36d47920770885
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
