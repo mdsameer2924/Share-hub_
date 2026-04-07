@@ -3,6 +3,8 @@ import socket
 import sys
 import qrcode
 import io
+import webbrowser ## for open exe/bin as click autlaunch web
+from threading import Timer
 from flask import Flask, request, redirect\
     , render_template_string, send_from_directory,send_file
 
@@ -201,14 +203,20 @@ def delete(filename):
 def gen_qr():
     data=f"http://{local_ip}:5000"
     img=qrcode.make(data)
-    buf = io.BytesIO()
+
+    buf = io.BytesIO() ## create a temp memory to store QR code instead in disk 
     img.save(buf, format='PNG')
     buf.seek(0)
-    
+
     return send_file(buf, mimetype='image/png')
+
+def open_browser():
+    webbrowser.open_new(local_ip_)
 
 
 if __name__ == "__main__":
     local_ip = get_local_ip()
+    local_ip_= f"http://{local_ip}:5000/"
     print(f"\n🚀 ShareHub running at http://{local_ip}:5000\n")
+    Timer(1,open_browser).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
