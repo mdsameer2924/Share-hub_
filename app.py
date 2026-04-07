@@ -1,42 +1,222 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 import os
 import socket
 import sys
+import qrcode
+import io
+import webbrowser ## for open exe/bin as click autlaunch web
+from threading import Timer
+from flask import Flask, request, redirect\
+    , render_template_string, send_from_directory,send_file
 
 app = Flask(__name__)
 
-# for pyinstaller path 
+# PyInstaller ke liye base path
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-app.config['Upload_folder'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
+# Track connected devices (IP + user-agent)
+connected_devices = {}
+
+ICONS = {
+    ".txt": "📄", ".pdf": "📕", ".png": "🖼️", ".jpg": "🖼️", ".jpeg": "🖼️",
+    ".mp4": "🎬", ".mp3": "🎵", ".zip": "🗜️", ".py": "🐍",
+    ".cpp": "💻", ".c": "💻", ".js": "🌐", ".html": "🌐", ".css": "🎨",
+}
+
+def get_icon(filename):
+    ext = os.path.splitext(filename)[-1].lower()
+    return ICONS.get(ext, "📁")
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareHub</title>
+    <style>
+        body { margin: 0; font-family: system-ui; background: #0f172a; color: white; }
+        header { text-align: center; padding: 20px; border-bottom: 1px solid #334155; }
+        header h1 { margin: 0; font-size: 24px; }
+        .ip { font-size: 12px; color: #94a3b8; }
+        main { max-width: 600px; margin: auto; padding: 20px; }
+        .step { font-size: 14px; margin-bottom: 8px; color: #cbd5e1; }
+        form { border: 2px dashed #38bdf8; padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
+        input[type="file"] { margin: 10px 0; color: white; }
+        button { background: #38bdf8; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        
+        .file { 
+        display: flex; justify-content: space-between; 
+        align-items: center; background: #1e293b; padding: 12px; 
+        border-radius: 8px; margin-bottom: 10px; transition: 0.2s; 
+        gap: 8px; flex-wrap: nowrap; 
+        }
+        .file:hover { transform: scale(1.02); }
+        .file p { margin: 0; }
+        a.dl { background: white; padding: 6px 12px; text-decoration: none; border-radius: 6px; color: black; font-size: 14px; }
+        .devices { margin-top: 25px; padding-top: 10px; border-top: 1px solid #334155; }
+        .device { font-size: 14px; margin-top: 5px; color: #cbd5e1; }
+        .flash { background: #166534; color: #bbf7d0; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+        .empty { color: #475569; font-size: 14px; }
+
+     .file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;   /* ← Android pe bada nahi hoga */
+}
+
+.file-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+.file-name {
+    flex: 1;           /* ← baaki sara space le lo */
+    overflow: hidden;
+    text-overflow: ellipsis;  /* ← lamba naam ... se cut ho */
+    white-space: nowrap;
+}
+    </style>
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>ShareHub</h1>
+        <p class="ip">{{ local_ip }}:5000</p>
+        <img src="/qr" height="50px" width="50px" alt="scan to connect">
+    </header>
+    <main>
+        {% if message %}
+        <div class="flash">{{ message }}</div>
+        {% endif %}
+
+        <section>
+            <p class="step">Upload File</p>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <p>Select a file to share</p>
+                <input type="file" name="file">
+                <br>
+                <button type="submit">Upload</button>
+            </form>
+        </section>
+
+        <section>
+            <p class="step">Available Files</p>
+            {% if files %}
+                {% for f in files %}
+                <article class="file">
+                    <p class="file-name">{{ get_icon(f) }} {{ f }}</p>
+                    <div class="file-actions">
+                    <a class="dl" href="/download/{{ f }}">
+                      <span class="iconify" data-icon="line-md:download-outline"></span>
+                    Download
+                    </a>
+
+                     <form action="/delete/{{ f }}" method="POST" style="border:none;padding:0px;margin:0px;">
+               
+    <button type="submit"> 
+    <span class="iconify" data-icon="weui:delete-on-filled" 
+    style="font-size: 15px;"></span></button>
+</form>  </div>
+                </article>
+               
+                {% endfor %}
+            {% else %}
+                <p class="empty">No files uploaded yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="devices">
+            <p class="step">Connected Devices</p>
+            {% if devices %}
+                {% for ip, ua in devices.items() %}
+                <p class="device">📱 {{ ip }} — {{ ua[:40] }}</p>
+                {% endfor %}
+            {% else %}
+                <p class="empty">No other devices connected.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
+"""
+
+@app.before_request
+def track_device():
+    ip = request.remote_addr
+    ua = request.headers.get("User-Agent", "Unknown")
+    connected_devices[ip] = ua
+
 @app.route("/")
-def home():
-    files = os.listdir(app.config['Upload_folder'])
-    return render_template("index.html", files=files)
+def index():
+    files = os.listdir(UPLOAD_FOLDER)
+    local_ip = get_local_ip()
+    return render_template_string(
+        TEMPLATE,
+        files=files,
+        local_ip=local_ip,
+        devices=connected_devices,
+        get_icon=get_icon,
+        message=request.args.get("msg")
+    )
 
-@app.route('/upload', methods=['POST'])
-def upload_File():
-    if 'file' not in request.files:
-        return redirect(url_for('home'))
-    file = request.files['file']
-    if file.filename == '':
-        return redirect(url_for('home'))
-    file_path = os.path.join(app.config['Upload_folder'], file.filename)
-    file.save(file_path)
-    return redirect(url_for('home'))
+@app.route("/upload", methods=["POST"])
+def upload():
+    file = request.files.get("file")
+    if not file or file.filename == "":
+        return redirect("/?msg=No file selected.")
+    file.save(os.path.join(UPLOAD_FOLDER, file.filename))
+    return redirect(f"/?msg='{file.filename}' uploaded successfully!")
 
-@app.route('/download/<filename>')
+@app.route("/download/<filename>")
 def download(filename):
-    return send_from_directory(app.config['Upload_folder'], filename, as_attachment=True)
+    return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+
+# Delete file options
+@app.route("/delete/<filename>",methods=['POST'])
+def delete(filename):
+    file_path=os.path.join(UPLOAD_FOLDER,filename)
+    os.remove(file_path)
+    return redirect("/?msg=File deleted!")
+
+## Qrcode 
+@app.route('/qr')
+def gen_qr():
+    data=f"http://{local_ip}:5000"
+    img=qrcode.make(data)
+
+    buf = io.BytesIO() ## create a temp memory to store QR code instead in disk 
+    img.save(buf, format='PNG')
+    buf.seek(0)
+
+    return send_file(buf, mimetype='image/png')
+
+def open_browser():
+    webbrowser.open_new(local_ip_)
+
 
 if __name__ == "__main__":
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    print(f"Phone → http://{ip}:8000")
-    app.run(debug=True, port=8000, host="0.0.0.0")
+    local_ip = get_local_ip()
+    local_ip_= f"http://{local_ip}:5000/"
+    print(f"\n🚀 ShareHub running at http://{local_ip}:5000\n")
+    Timer(1,open_browser).start()
+    app.run(host="0.0.0.0", port=5000, debug=True)
