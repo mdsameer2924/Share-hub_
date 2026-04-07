@@ -1,7 +1,10 @@
 import os
 import socket
 import sys
-from flask import Flask, request, redirect, render_template_string, send_from_directory
+import qrcode
+import io
+from flask import Flask, request, redirect\
+    , render_template_string, send_from_directory,send_file
 
 app = Flask(__name__)
 
@@ -97,6 +100,7 @@ TEMPLATE = """
     <header>
         <h1>ShareHub</h1>
         <p class="ip">{{ local_ip }}:5000</p>
+        <img src="/qr" height="50px" width="50px" alt="scan to connect">
     </header>
     <main>
         {% if message %}
@@ -191,6 +195,17 @@ def delete(filename):
     file_path=os.path.join(UPLOAD_FOLDER,filename)
     os.remove(file_path)
     return redirect("/?msg=File deleted!")
+
+## Qrcode 
+@app.route('/qr')
+def gen_qr():
+    data=f"http://{local_ip}:5000"
+    img=qrcode.make(data)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    
+    return send_file(buf, mimetype='image/png')
 
 
 if __name__ == "__main__":
