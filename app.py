@@ -55,7 +55,13 @@ TEMPLATE = """
         form { border: 2px dashed #38bdf8; padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
         input[type="file"] { margin: 10px 0; color: white; }
         button { background: #38bdf8; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 500; }
-        .file { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 10px; transition: 0.2s; }
+        
+        .file { 
+        display: flex; justify-content: space-between; 
+        align-items: center; background: #1e293b; padding: 12px; 
+        border-radius: 8px; margin-bottom: 10px; transition: 0.2s; 
+        gap: 8px; flex-wrap: nowrap; 
+        }
         .file:hover { transform: scale(1.02); }
         .file p { margin: 0; }
         a.dl { background: white; padding: 6px 12px; text-decoration: none; border-radius: 6px; color: black; font-size: 14px; }
@@ -63,6 +69,27 @@ TEMPLATE = """
         .device { font-size: 14px; margin-top: 5px; color: #cbd5e1; }
         .flash { background: #166534; color: #bbf7d0; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
         .empty { color: #475569; font-size: 14px; }
+
+     .file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;   /* ← Android pe bada nahi hoga */
+}
+
+.file-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+.file-name {
+    flex: 1;           /* ← baaki sara space le lo */
+    overflow: hidden;
+    text-overflow: ellipsis;  /* ← lamba naam ... se cut ho */
+    white-space: nowrap;
+}
     </style>
     <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 </head>
@@ -91,18 +118,19 @@ TEMPLATE = """
             {% if files %}
                 {% for f in files %}
                 <article class="file">
-                    <p>{{ get_icon(f) }} {{ f }}</p>
+                    <p class="file-name">{{ get_icon(f) }} {{ f }}</p>
+                    <div class="file-actions">
                     <a class="dl" href="/download/{{ f }}">
                       <span class="iconify" data-icon="line-md:download-outline"></span>
                     Download
                     </a>
 
-                     <form action="/delete/{{ f }}" method="POST" style="border:none;padding:5px;margin:5px;">
+                     <form action="/delete/{{ f }}" method="POST" style="border:none;padding:0px;margin:0px;">
                
     <button type="submit"> 
     <span class="iconify" data-icon="weui:delete-on-filled" 
     style="font-size: 15px;"></span></button>
-</form>
+</form>  </div>
                 </article>
                
                 {% endfor %}
