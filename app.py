@@ -57,54 +57,42 @@ TEMPLATE = """
         .ip { font-size: 12px; color: #94a3b8; }
         main { max-width: 600px; margin: auto; padding: 20px; }
         .step { font-size: 14px; margin-bottom: 8px; color: #cbd5e1; }
-        .step-notes { font-size: 14px; margin-bottom: 8px; color: #cbd5e1; }
+        
+        /* NO-JS Fade Out Animation */
+        @keyframes fadeAway {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        .flash { 
+            background: #166534; color: #bbf7d0; padding: 10px 14px; 
+            border-radius: 8px; margin-bottom: 16px; font-size: 14px;
+            animation: fadeAway 2s forwards;
+        }
+
         form { border: 2px dashed #38bdf8; padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
-        input[type="file"] { margin: 10px 0; color: white; }
+        input[type="file"], textarea { margin: 10px 0; color: white; width: 100%; box-sizing: border-box; }
+        textarea { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; color: white; font-family: inherit; }
         button { background: #38bdf8; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 500; }
         
         .file { 
-        display: flex; justify-content: space-between; 
-        align-items: center; background: #1e293b; padding: 12px; 
-        border-radius: 8px; margin-bottom: 10px; transition: 0.2s; 
-        gap: 8px; flex-wrap: nowrap; 
+            display: flex; justify-content: space-between; 
+            align-items: center; background: #1e293b; padding: 12px; 
+            border-radius: 8px; margin-bottom: 10px; gap: 8px; 
         }
-        .file:hover { transform: scale(1.02); }
-        .file p { margin: 0; }
+        .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+        .file-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
         a.dl { background: white; padding: 6px 12px; text-decoration: none; border-radius: 6px; color: black; font-size: 14px; }
+        
         .devices { margin-top: 25px; padding-top: 10px; border-top: 1px solid #334155; }
-        .device { font-size: 14px; margin-top: 5px; color: #cbd5e1; }
-        .flash { background: #166534; color: #bbf7d0; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
-        .empty { color: #475569; font-size: 14px; }
-
-     .file-name {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 14px;   /* ← Android pe bada nahi hoga */
-}
-
-.file-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-shrink: 0;
-}
-.file-name {
-    flex: 1;           /* ← baaki sara space le lo */
-    overflow: hidden;
-    text-overflow: ellipsis;  /* ← lamba naam ... se cut ho */
-    white-space: nowrap;
-}
-
-
-
+        .device { font-size: 13px; margin-top: 5px; color: #94a3b8; }
+        .empty { color: #475569; font-size: 14px; text-align: center; margin-top: 20px; }
     </style>
-    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+  <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>ShareHub</h1>
+        <p class="iconify" data-icon="mdi:cloud-upload-outline"></span><h1>ShareHub</h1>
         <p class="ip">{{ local_ip }}:5000</p>
         <img src="/qr" height="50px" width="50px" alt="scan to connect">
     </header>
@@ -121,12 +109,16 @@ TEMPLATE = """
                 <p>Select a file to share</p>
                 <input style=display: none;  type="file" name="file" id="fileInput">
                 <br>
-                <button type="submit" class="iconify" data-icon="line-md:cloud-alt-upload-twotone">Upload</button>
+                <button type="submit" >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-dasharray="60" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 19h11c2.21 0 4 -1.79 4 -4c0 -2.21 -1.79 -4 -4 -4h-1v-1c0 -2.76 -2.24 -5 -5 -5c-2.42 0 -4.44 1.72 -4.9 4h-0.1c-2.76 0 -5 2.24 -5 5c0 2.76 2.24 5 5 5Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="60;0"/></path><path fill="currentColor" d="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z"><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.4s" keyTimes="0;0.4;1" 
+                values="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z;M10.5 16h3v0h2.5l-4 -4l-4 4h2.5Z;M10.5 16h3v-3h2.5l-4 -4l-4 4h2.5Z"/></path></svg>upload
+                </button>
             </form>
             <p class="step">share notes directly </p>
             <form action="/upload" method="POST" enctype="multipart/form-data">
              <textarea style="background-color: transparent; border-color: transparent; color: white;" name="textcontent" rows="10" cols="50" placeholder="Write your text here..."></textarea><br>
-    <button type="submit">Upload</button>
+    <button type="submit"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-dasharray="60" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 19h11c2.21 0 4 -1.79 4 -4c0 -2.21 -1.79 -4 -4 -4h-1v-1c0 -2.76 -2.24 -5 -5 -5c-2.42 0 -4.44 1.72 -4.9 4h-0.1c-2.76 0 -5 2.24 -5 5c0 2.76 2.24 5 5 5Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="60;0"/></path><path fill="currentColor" d="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z"><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.4s"
+      keyTimes="0;0.4;1" values="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z;M10.5 16h3v0h2.5l-4 -4l-4 4h2.5Z;M10.5 16h3v-3h2.5l-4 -4l-4 4h2.5Z"/></path></svg>Upload</button>
     </form>
 
         </section>
@@ -140,22 +132,17 @@ TEMPLATE = """
                 <article class="file">
                     <p class="file-name">{{ get_icon(f) }} {{ f }}</p>
                     <div class="file-actions">
-                    <a class="dl" href="/download/{{ f }}">
-                      <span class="iconify" data-icon="line-md:download-outline"></span>
-                    Download
-                    </a>
-
-                     <form action="/delete/{{ f }}" method="POST" style="border:none;padding:0px;margin:0px;">
-               
-    <button type="submit"> 
-    <span class="iconify" data-icon="weui:delete-on-filled" 
-    style="font-size: 15px;"></span></button>
-</form>  </div>
+                        <a class="dl" href="/download/{{ f }}"> <span class="iconify" data-icon="line-md:download-outline"></span> Download</a>
+                        <form action="/delete/{{ f }}" method="POST" style="margin:0;padding:0;border:none;">
+                            <button type="submit" style="background:#blue; color:white; padding: 6px 10px;">
+                                <span class="iconify" data-icon="weui:delete-on-filled"></span>
+                            </button>
+                        </form>
+                    </div>
                 </article>
-               
                 {% endfor %}
             {% else %}
-                <p class="empty">No files uploaded yet.</p>
+                <p class="empty">Folder is empty (Zero Items)</p>
             {% endif %}
         </section>
 
@@ -194,55 +181,49 @@ def index():
     )
 
 @app.route("/upload", methods=["POST"])
-@app.route("/upload", methods=["POST"])
 def upload():
     file = request.files.get("file")
-    text = request.form.get("textcontent")
-
-    if text and text.strip():
-        # text ko .txt file ki tarah save karo
-        from datetime import datetime
-        filename = f"note_{datetime.now().strftime('%H%M%S')}.txt"
-        with open(os.path.join(UPLOAD_FOLDER, filename), 'w') as f:
-            f.write(text)
-        return redirect(f"/?msg=Note saved as '{filename}'!")
-
     if not file or file.filename == "":
-        return redirect("/?msg=No file selected.")
-
+        return redirect("/?msg=Select a file first!")
     file.save(os.path.join(UPLOAD_FOLDER, file.filename))
-    return redirect(f"/?msg='{file.filename}' uploaded successfully!")
+    return redirect(f"/?msg=File '{file.filename}' Uploaded!")
+
+@app.route("/add_note", methods=["POST"])
+def add_note():
+    text = request.form.get("note_text")
+    if not text or text.strip() == "":
+        return redirect("/?msg=Note cannot be empty!")
+    count = len([f for f in os.listdir(UPLOAD_FOLDER) if f.startswith("Note")]) + 1
+    filename = f"Note_{count}.txt"
+    with open(os.path.join(UPLOAD_FOLDER, filename), "w", encoding="utf-8") as f:
+        f.write(text)
+    return redirect(f"/?msg=Note saved as {filename}!")
 
 @app.route("/download/<filename>")
 def download(filename):
     return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
 
-# Delete file options
-@app.route("/delete/<filename>",methods=['POST'])
+@app.route("/delete/<filename>", methods=['POST'])
 def delete(filename):
-    file_path=os.path.join(UPLOAD_FOLDER,filename)
-    os.remove(file_path)
-    return redirect("/?msg=File deleted!")
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    return redirect("/?msg=Item deleted!")
 
-## Qrcode 
 @app.route('/qr')
 def gen_qr():
-    img=qrcode.make(local_ip_)
-
-    buf = io.BytesIO() ## create a temp memory to store QR code instead in disk 
+    img = qrcode.make(f"http://{get_local_ip()}:5000")
+    buf = io.BytesIO()
     img.save(buf, format='PNG')
     buf.seek(0)
-
     return send_file(buf, mimetype='image/png')
 
 def open_browser():
-    # webbrowser.open_new(local_ip_)
-    Timer(1, lambda: webbrowser.open_new(f"http://{get_local_ip()}:5000/")).start()
-
+    webbrowser.open_new(f"http://{get_local_ip()}:5000/")
 
 if __name__ == "__main__":
     local_ip = get_local_ip()
-    local_ip_= f"http://{local_ip}:5000/"
     print(f"\n🚀 ShareHub running at http://{local_ip}:5000\n")
-    Timer(1,open_browser).start()
+    Timer(1, open_browser).start()
     app.run(host="0.0.0.0", port=5000, debug=True)
+    
