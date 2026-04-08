@@ -57,6 +57,7 @@ TEMPLATE = """
         .ip { font-size: 12px; color: #94a3b8; }
         main { max-width: 600px; margin: auto; padding: 20px; }
         .step { font-size: 14px; margin-bottom: 8px; color: #cbd5e1; }
+        .step-notes { font-size: 14px; margin-bottom: 8px; color: #cbd5e1; }
         form { border: 2px dashed #38bdf8; padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
         input[type="file"] { margin: 10px 0; color: white; }
         button { background: #38bdf8; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 500; }
@@ -95,6 +96,9 @@ TEMPLATE = """
     text-overflow: ellipsis;  /* ← lamba naam ... se cut ho */
     white-space: nowrap;
 }
+
+
+
     </style>
     <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 </head>
@@ -109,15 +113,25 @@ TEMPLATE = """
         <div class="flash">{{ message }}</div>
         {% endif %}
 
+        
+
         <section>
             <p class="step">Upload File</p>
-            <form action="/upload" method="POST" enctype="multipart/form-data">
+            <form  action="/upload" method="POST" enctype="multipart/form-data">
                 <p>Select a file to share</p>
-                <input type="file" name="file">
+                <input style=display: none;  type="file" name="file" id="fileInput">
                 <br>
-                <button type="submit">Upload</button>
+                <button type="submit" class="iconify" data-icon="line-md:cloud-alt-upload-twotone">Upload</button>
             </form>
+            <p class="step">share notes directly </p>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+             <textarea style="background-color: transparent; border-color: transparent; color: white;" name="textcontent" rows="10" cols="50" placeholder="Write your text here..."></textarea><br>
+    <button type="submit">Upload</button>
+    </form>
+
         </section>
+
+        
 
         <section>
             <p class="step">Available Files</p>
@@ -180,10 +194,22 @@ def index():
     )
 
 @app.route("/upload", methods=["POST"])
+@app.route("/upload", methods=["POST"])
 def upload():
     file = request.files.get("file")
+    text = request.form.get("textcontent")
+
+    if text and text.strip():
+        # text ko .txt file ki tarah save karo
+        from datetime import datetime
+        filename = f"note_{datetime.now().strftime('%H%M%S')}.txt"
+        with open(os.path.join(UPLOAD_FOLDER, filename), 'w') as f:
+            f.write(text)
+        return redirect(f"/?msg=Note saved as '{filename}'!")
+
     if not file or file.filename == "":
         return redirect("/?msg=No file selected.")
+
     file.save(os.path.join(UPLOAD_FOLDER, file.filename))
     return redirect(f"/?msg='{file.filename}' uploaded successfully!")
 
@@ -201,8 +227,7 @@ def delete(filename):
 ## Qrcode 
 @app.route('/qr')
 def gen_qr():
-    data=f"http://{local_ip}:5000"
-    img=qrcode.make(data)
+    img=qrcode.make(local_ip_)
 
     buf = io.BytesIO() ## create a temp memory to store QR code instead in disk 
     img.save(buf, format='PNG')
@@ -211,7 +236,8 @@ def gen_qr():
     return send_file(buf, mimetype='image/png')
 
 def open_browser():
-    webbrowser.open_new(local_ip_)
+    # webbrowser.open_new(local_ip_)
+    Timer(1, lambda: webbrowser.open_new(f"http://{get_local_ip()}:5000/")).start()
 
 
 if __name__ == "__main__":

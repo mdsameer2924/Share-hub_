@@ -1,148 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShareHub</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShareHub</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: system-ui;
-            background: #0f172a;
-            color: white;
-        }
-        
-        header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 1px solid #334155;
-        }
-        
-        header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-        
-        .ip {
-            font-size: 12px;
-            color: #94a3b8;
-        }
-        
-        main {
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-        }
-        
-        .step {
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #cbd5f5;
-        }
-        
-        form {
-            border: 2px dashed #38bdf8;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        input[type="file"] {
-            margin: 10px 0;
-        }
-        
-        button {
-            background: #38bdf8;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        
-        .file {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1e293b;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            transition: 0.2s;
-        }
-        
-        .file:hover {
-            transform: scale(1.02);
-        }
-        
-        .file p {
-            margin: 0;
-        }
-        
-        a {
-            background: rgb(176, 37, 37);
-            padding: 6px 12px;
-            text-decoration: none;
-            border-radius: 6px;
-            color: black;
-            font-size: 14px;
-        }
-        
-        .devices {
-            margin-top: 25px;
-            padding-top: 10px;
-            border-top: 1px solid #334155;
-        }
-        
-        .device {
-            font-size: 14px;
-            margin-top: 5px;
-            color: #cbd5f5;
-        }
-
-
-    </style>
 </head>
+<style>
+
+    body {
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color: white;
+    font-family: 'Segoe UI';
+}
+
+/* Header */
+header {
+    text-align: center;
+    padding: 20px;
+}
+
+header h1 {
+    font-size: 28px;
+}
+
+.qr {
+    margin: 10px auto;
+    width: 70px;
+    height: 70px;
+    background: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+/* Container */
+.container {
+    width: 80%;
+    margin: auto;
+}
+
+/* Cards */
+.card {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+/* Buttons */
+button {
+    background: #3b82f6;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: #2563eb;
+}
+
+/* File Item */
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* Notes */
+.notes-section {
+    position: relative;
+}
+
+.pen-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.notes-preview {
+    margin-top: 20px;
+    color: #94a3b8;
+}
+
+/* Popup */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background: #020617;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    margin-top: 10px;
+    background: #1e293b;
+    border: none;
+    color: white;
+    padding: 10px;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+</style>
+
 <body>
 
-    <header>
-        <h1>ShareHub</h1>
-        <p class="ip">192.168.1.10</p>
-    </header>
+<!-- Header -->
+<header>
+    <h1>ShareHub</h1>
+    <p>192.168.1.71:5000</p>
+    <div class="qr">QR</div>
+</header>
 
-    <main>
+<!-- Main Container -->
+<div class="container">
 
-        <section>
-            <p class="step">Upload File</p>
+    <!-- Upload Section -->
+    <div class="card">
+        <h2>Upload File</h2>
+        <input type="file">
+        <button>Upload</button>
+    </div>
 
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-                <p>Select a file to share</p>
-                <input type="file" name="file" required>
-                <br>
-                <button type="submit">Upload</button>
-            </form>
-        </section>
+    <!-- Notes Section -->
+    <div class="card notes-section">
+        <h2>Upload Text</h2>
 
-        <section>
-            <p class="step">Available Files</p>
-{% for file in files %}
-<article class="file">
-    <p>{{ get_icon(f) }} {{ f }}</p>
-    <a class="dl" href="/download/{{ f }}">Download</a>
-{% else %}
-<p style="color: #94a3b8;">Koi file nahi hai abhi.</p>
-{% endfor %}
-        </section>
+        <!-- Pen Icon -->
+        <span class="pen-icon" onclick="openPopup()">✏️</span>
 
-        <section class="devices">
-            <p class="step">Connected Devices</p>
+        <div class="notes-preview">
+            Click ✏️ to write notes
+        </div>
+    </div>
 
+    <!-- Files Section -->
+    <div class="card">
+        <h2>Available Files</h2>
 
-        </section>
+        <div class="file-item">
+            <span>📄 readme.md</span>
+            <di</div>
+            <div>
+                <button class="download">Download</button>
+                <button class="delete">🗑</button>
+            </div>
+        </div>
 
-    </main>
+    </div>
+
+</div>
+
+<!-- Popup Modal -->
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <h3>Write Notes</h3>
+        <textarea id="noteText" placeholder="Write your notes here..."></textarea>
+        <div class="popup-buttons">
+            <button onclick="saveNote()">Save</button>
+            <button onclick="closePopup()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
 
 </body>
 </html>
