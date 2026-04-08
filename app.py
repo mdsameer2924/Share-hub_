@@ -167,6 +167,7 @@ def track_device():
     ua = request.headers.get("User-Agent", "Unknown")
     connected_devices[ip] = ua
 
+
 @app.route("/")
 def index():
     files = os.listdir(UPLOAD_FOLDER)
