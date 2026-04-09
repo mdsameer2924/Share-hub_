@@ -3,24 +3,24 @@ import socket
 import sys
 import qrcode
 import io
-import webbrowser
+import webbrowser ## for open exe/bin as click autlaunch web
 from threading import Timer
-from flask import Flask, request, redirect, render_template_string, send_from_directory, send_file
+from flask import Flask, request, redirect\
+    , render_template_string, send_from_directory,send_file
 
 app = Flask(__name__)
 
-# PyInstaller base path logic
+# PyInstaller ke liye base path
 if getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Folder setup
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Connected devices track
+
+# Track connected devices (IP + user-agent)
 connected_devices = {}
 
 ICONS = {
@@ -88,46 +88,54 @@ TEMPLATE = """
         .device { font-size: 13px; margin-top: 5px; color: #94a3b8; }
         .empty { color: #475569; font-size: 14px; text-align: center; margin-top: 20px; }
     </style>
-    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+  <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>ShareHub</h1>
-        <p class="ip">{{ local_ip }}:5000</p>
-        <img src="/qr" height="50px" width="50px" alt="QR">
+        <h1><span class="iconify" data-icon=hugeicons:shared-wifi></span> ShareHub</h1>
+       <p class="ip"> <span class="iconify" data-icon=material-symbols:info></span> {{ local_ip }}:5000</p>
+        <img src="/qr" height="50px" width="50px" alt="scan to connect">
     </header>
     <main>
         {% if message %}
         <div class="flash">{{ message }}</div>
         {% endif %}
 
+        
+
         <section>
             <p class="step">Upload File</p>
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-                <input type="file" name="file">
+            <form  action="/upload" method="POST" enctype="multipart/form-data">
+                <p>Select a file to share</p>
+                <input style=display: none;  type="file" name="file" id="fileInput">
                 <br>
-                <button type="submit">Upload</button>
+                <button type="submit" >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-dasharray="60" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 19h11c2.21 0 4 -1.79 4 -4c0 -2.21 -1.79 -4 -4 -4h-1v-1c0 -2.76 -2.24 -5 -5 -5c-2.42 0 -4.44 1.72 -4.9 4h-0.1c-2.76 0 -5 2.24 -5 5c0 2.76 2.24 5 5 5Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="60;0"/></path><path fill="currentColor" d="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z"><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.4s" keyTimes="0;0.4;1" 
+                values="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z;M10.5 16h3v0h2.5l-4 -4l-4 4h2.5Z;M10.5 16h3v-3h2.5l-4 -4l-4 4h2.5Z"/></path></svg>Upload
+                </button>
             </form>
-        </section>
+
+        </section> 
 
         <section>
             <p class="step">Add Note</p>
             <form action="/add_note" method="POST">
                 <textarea name="note_text" rows="3" placeholder="Write something and save..."></textarea>
-                <button type="submit">Save Note</button>
+                <button type="submit"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24"><path fill="#000" d="M3 21V3h18v8.7q-.475-.225-.975-.387T19 11.075V5H5v14h6.05q.075.55.238 1.05t.387.95zm2-3v1V5v6.075V11zm2-1h4.075q.075-.525.238-1.025t.362-.975H7zm0-4h6.1q.8-.75 1.788-1.25T17 11.075V11H7zm0-4h10V7H7zm11 14q-2.075 0-3.537-1.463T13 18t1.463-3.537T18 13t3.538 1.463T23 18t-1.463 3.538T18 23m-.5-2h1v-2.5H21v-1h-2.5V15h-1v2.5H15v1h2.5z"/></svg>Save Note</button>
             </form>
         </section>
+        
 
         <section>
-            <p class="step">Available Items</p>
+            <p class="step">Available Files</p>
             {% if files %}
                 {% for f in files %}
                 <article class="file">
                     <p class="file-name">{{ get_icon(f) }} {{ f }}</p>
                     <div class="file-actions">
-                        <a class="dl" href="/download/{{ f }}">Download</a>
+                        <a class="dl" href="/download/{{ f }}"> <span class="iconify" data-icon="line-md:download-outline"></span> Download</a>
                         <form action="/delete/{{ f }}" method="POST" style="margin:0;padding:0;border:none;">
-                            <button type="submit" style="background:#ef4444; color:white; padding: 6px 10px;">
+                            <button type="submit" style="background:#blue; color:white; padding: 6px 10px;">
                                 <span class="iconify" data-icon="weui:delete-on-filled"></span>
                             </button>
                         </form>
@@ -141,9 +149,13 @@ TEMPLATE = """
 
         <section class="devices">
             <p class="step">Connected Devices</p>
-            {% for ip, ua in devices.items() %}
-                <p class="device">📱 {{ ip }} — {{ ua[:30] }}...</p>
-            {% endfor %}
+            {% if devices %}
+                {% for ip, ua in devices.items() %}
+                <p class="device">📱 {{ ip }} — {{ ua[:40] }}</p>
+                {% endfor %}
+            {% else %}
+                <p class="empty">No other devices connected.</p>
+            {% endif %}
         </section>
     </main>
 </body>
@@ -152,15 +164,19 @@ TEMPLATE = """
 
 @app.before_request
 def track_device():
-    connected_devices[request.remote_addr] = request.headers.get("User-Agent", "Unknown")
+    ip = request.remote_addr
+    ua = request.headers.get("User-Agent", "Unknown")
+    connected_devices[ip] = ua
+
 
 @app.route("/")
 def index():
     files = os.listdir(UPLOAD_FOLDER)
+    local_ip = get_local_ip()
     return render_template_string(
         TEMPLATE,
         files=files,
-        local_ip=get_local_ip(),
+        local_ip=local_ip,
         devices=connected_devices,
         get_icon=get_icon,
         message=request.args.get("msg")
