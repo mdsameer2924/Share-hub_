@@ -92,8 +92,8 @@ TEMPLATE = """
 </head>
 <body>
     <header>
-        <p class="iconify" data-icon="mdi:cloud-upload-outline"></span><h1>ShareHub</h1>
-        <p class="ip">{{ local_ip }}:5000</p>
+        <h1><span class="iconify" data-icon=hugeicons:shared-wifi></span> ShareHub</h1>
+       <p class="ip"> <span class="iconify" data-icon=material-symbols:info></span> {{ local_ip }}:5000</p>
         <img src="/qr" height="50px" width="50px" alt="scan to connect">
     </header>
     <main>
@@ -111,18 +111,19 @@ TEMPLATE = """
                 <br>
                 <button type="submit" >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-dasharray="60" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 19h11c2.21 0 4 -1.79 4 -4c0 -2.21 -1.79 -4 -4 -4h-1v-1c0 -2.76 -2.24 -5 -5 -5c-2.42 0 -4.44 1.72 -4.9 4h-0.1c-2.76 0 -5 2.24 -5 5c0 2.76 2.24 5 5 5Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="60;0"/></path><path fill="currentColor" d="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z"><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.4s" keyTimes="0;0.4;1" 
-                values="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z;M10.5 16h3v0h2.5l-4 -4l-4 4h2.5Z;M10.5 16h3v-3h2.5l-4 -4l-4 4h2.5Z"/></path></svg>upload
+                values="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z;M10.5 16h3v0h2.5l-4 -4l-4 4h2.5Z;M10.5 16h3v-3h2.5l-4 -4l-4 4h2.5Z"/></path></svg>Upload
                 </button>
             </form>
-            <p class="step">share notes directly </p>
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-             <textarea style="background-color: transparent; border-color: transparent; color: white;" name="textcontent" rows="10" cols="50" placeholder="Write your text here..."></textarea><br>
-    <button type="submit"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-dasharray="60" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 19h11c2.21 0 4 -1.79 4 -4c0 -2.21 -1.79 -4 -4 -4h-1v-1c0 -2.76 -2.24 -5 -5 -5c-2.42 0 -4.44 1.72 -4.9 4h-0.1c-2.76 0 -5 2.24 -5 5c0 2.76 2.24 5 5 5Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="60;0"/></path><path fill="currentColor" d="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z"><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.4s"
-      keyTimes="0;0.4;1" values="M10.5 16h3v0h2.5l-4 0l-4 0h2.5Z;M10.5 16h3v0h2.5l-4 -4l-4 4h2.5Z;M10.5 16h3v-3h2.5l-4 -4l-4 4h2.5Z"/></path></svg>Upload</button>
-    </form>
 
+        </section> 
+
+        <section>
+            <p class="step">Add Note</p>
+            <form action="/add_note" method="POST">
+                <textarea name="note_text" rows="3" placeholder="Write something and save..."></textarea>
+                <button type="submit"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="18" viewBox="0 0 24 24"><path fill="#000" d="M3 21V3h18v8.7q-.475-.225-.975-.387T19 11.075V5H5v14h6.05q.075.55.238 1.05t.387.95zm2-3v1V5v6.075V11zm2-1h4.075q.075-.525.238-1.025t.362-.975H7zm0-4h6.1q.8-.75 1.788-1.25T17 11.075V11H7zm0-4h10V7H7zm11 14q-2.075 0-3.537-1.463T13 18t1.463-3.537T18 13t3.538 1.463T23 18t-1.463 3.538T18 23m-.5-2h1v-2.5H21v-1h-2.5V15h-1v2.5H15v1h2.5z"/></svg>Save Note</button>
+            </form>
         </section>
-
         
 
         <section>
